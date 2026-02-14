@@ -31,3 +31,5 @@ Este documento descreve a arquitetura de dados (Star Schema) utilizada para extr
 ## 💡 Notas de Implementação
 - **Periodicidade:** Coletas durante a rodada capturam parciais. Coletas pós-fechamento capturam dados consolidados.
 - **Relacionamentos:** O `atleta_id` é a chave primária que conecta a Dim_Atleta com as tabelas de Fato_Mercado e Fato_Pontuacao.
+
+venv source cartoleiro/bin/activate
