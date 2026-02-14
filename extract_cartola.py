@@ -70,7 +70,7 @@ def salvar_json(endpoint_name, particionador, valor_particao, payload):
         Body=json.dumps(payload)
     )
 
-    print(f"Salvo em s3://{BUCKET_NAME}/{key}")
+    print(f"📦 Salvo em s3://{BUCKET_NAME}/{key}")
 
 
 # =========================
@@ -84,48 +84,91 @@ def main():
     ultima_processada = state["ultima_rodada_processada"]
 
     print("📡 Consultando mercado/status...")
-    status = requests.get(ENDPOINT_STATUS).json()
+    status_response = requests.get(ENDPOINT_STATUS)
 
-    rodada_consolidada = status.get("rodada_anterior")
+    if status_response.status_code != 200:
+        print("❌ Erro ao consultar mercado/status")
+        print(status_response.text)
+        return
+
+    status = status_response.json()
+
+    rodada_atual = status.get("rodada_atual")
     status_mercado = status.get("status_mercado")
 
-    print(f"Rodada consolidada: {rodada_consolidada}")
-    print(f"Última processada: {ultima_processada}")
-
-    # Mercado fechado geralmente é status 2
-    if rodada_consolidada is None:
+    if rodada_atual is None:
         print("⚠️ Não foi possível identificar rodada.")
         return
 
-    if rodada_consolidada <= ultima_processada:
+    # Determinar última rodada consolidada
+    if status_mercado == 1:  # mercado aberto
+        rodada_max = rodada_atual - 1
+    elif status_mercado == 2:  # mercado fechado
+        rodada_max = rodada_atual
+    else:
+        print("⚠️ Status de mercado inesperado.")
+        return
+
+    print(f"Rodada máxima consolidada: {rodada_max}")
+    print(f"Última rodada processada: {ultima_processada}")
+
+    if rodada_max <= ultima_processada:
         print("✅ Nenhuma nova rodada para processar.")
-        return
+    else:
+        for rodada in range(ultima_processada + 1, rodada_max + 1):
 
-    if rodada_ja_existe(rodada_consolidada):
-        print("⚠️ Rodada já existe no S3. Abortando.")
-        return
+            print(f"\n🚀 Processando rodada {rodada}...")
 
-    print(f"🚀 Processando rodada {rodada_consolidada}...")
+            if rodada_ja_existe(rodada):
+                print(f"⚠️ Rodada {rodada} já existe no S3. Pulando.")
+                continue
 
-    # Extrair pontuados
-    pontuados = requests.get(ENDPOINT_PONTUADOS).json()
-    salvar_json(
-        "atletas_pontuados",
-        "rodada",
-        rodada_consolidada,
-        pontuados
-    )
+            # ---------------------------
+            # PONTUADOS
+            # ---------------------------
+            url_pontuados = f"{ENDPOINT_PONTUADOS}/{rodada}"
+            response_pontuados = requests.get(url_pontuados)
 
-    # Extrair partidas
-    partidas = requests.get(ENDPOINT_PARTIDAS).json()
-    salvar_json(
-        "partidas",
-        "rodada",
-        rodada_consolidada,
-        partidas
-    )
+            if response_pontuados.status_code != 200:
+                print(f"❌ Erro ao buscar pontuados da rodada {rodada}")
+                print(response_pontuados.text)
+                continue
 
-    # Salvar snapshot de status
+            pontuados = response_pontuados.json()
+
+            salvar_json(
+                "atletas_pontuados",
+                "rodada",
+                rodada,
+                pontuados
+            )
+
+            # ---------------------------
+            # PARTIDAS
+            # ---------------------------
+            url_partidas = f"{ENDPOINT_PARTIDAS}/{rodada}"
+            response_partidas = requests.get(url_partidas)
+
+            if response_partidas.status_code != 200:
+                print(f"❌ Erro ao buscar partidas da rodada {rodada}")
+                print(response_partidas.text)
+                continue
+
+            partidas = response_partidas.json()
+
+            salvar_json(
+                "partidas",
+                "rodada",
+                rodada,
+                partidas
+            )
+
+            # Atualiza controle após sucesso
+            update_pipeline_state(rodada)
+
+            print(f"✅ Rodada {rodada} processada com sucesso.")
+
+    # Snapshot de mercado_status sempre
     salvar_json(
         "mercado_status",
         "data",
@@ -133,11 +176,12 @@ def main():
         status
     )
 
-    # Atualizar controle
-    update_pipeline_state(rodada_consolidada)
+    print("\n🏁 Execução finalizada.")
 
-    print("✅ Rodada processada com sucesso.")
 
+# =========================
+# ENTRY POINT
+# =========================
 
 if __name__ == "__main__":
     main()
