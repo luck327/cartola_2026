@@ -156,7 +156,7 @@ Motivo:
 
 # Scripts
 
-## extract_facts.py
+## extract_cartola.py (entrypoint)
 
 Responsável por:
 
@@ -188,7 +188,7 @@ Características:
 
 ---
 
-## extract_dimensions.py
+## extract_cartola_dimensions.py (entrypoint)
 
 Responsável por:
 
@@ -262,6 +262,23 @@ Objetivo:
 
 ---
 
+
+## Organização de código (atual)
+
+Com a reorganização recente, a lógica principal vive em `src/cartola_pipeline`:
+
+- `src/cartola_pipeline/ingestion/extract_facts.py`
+- `src/cartola_pipeline/ingestion/extract_dimensions.py`
+- `src/cartola_pipeline/config/settings.py`
+- `src/cartola_pipeline/utils/s3_helpers.py`
+
+Os scripts da raiz continuam como wrappers de compatibilidade:
+
+- `extract_cartola.py`
+- `extract_cartola_dimensions.py`
+
+---
+
 # Execução
 
 ## Criar ambiente virtual
@@ -285,7 +302,7 @@ python extract_cartola.py
 
 
 
-python extract_dimensions.py
+python extract_cartola_dimensions.py
 
 
 ---
