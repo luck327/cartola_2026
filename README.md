@@ -21,3 +21,11 @@ O projeto segue o padrão **Medallion Architecture**:
 ## 🧠 Desafios Superados
 - **Tratamento de JSONs dinâmicos:** Implementação de lógica de `Explode` e `MapType` para tratar campos onde o dado (ID) era o nome da coluna.
 - **FinOps:** Monitoramento ativo de custos para operação 100% gratuita dentro do AWS Free Tier.
+
+
+## 🗂️ Organização de Pastas (atual)
+- `src/cartola_pipeline/config`: configurações centralizadas.
+- `src/cartola_pipeline/ingestion`: extrações da API (fatos e dimensões).
+- `src/cartola_pipeline/utils`: utilitários de integração (S3, datas, etc.).
+- `docs/architecture_folders.md`: guia da estrutura adotada.
+- Scripts de raiz permanecem como entrypoints de compatibilidade.
