@@ -3,7 +3,7 @@
 
 # ⚽ Cartola 2026: Engenharia de Dados de Alta Performance
 
-Este projeto demonstra a construção de um **Data Lakehouse** completo na AWS, utilizando dados reais da API do Cartola FC para análise preditiva e estatística.
+Este projeto demonstra a construção de um **Data Lakehouse** completo na AWS, utilizando dados reais da API do Cartola FC 2026 para análise preditiva e estatística.
 
 ## 🚀 Arquitetura do Projeto
 O projeto segue o padrão **Medallion Architecture**:
