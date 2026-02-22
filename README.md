@@ -1,3 +1,6 @@
+
+<img width="883" height="312" alt="image" src="https://github.com/user-attachments/assets/8c5c4a4a-9d51-4c72-8a5e-dcca9e358bfd" />
+
 # ⚽ Cartola 2026: Engenharia de Dados de Alta Performance
 
 Este projeto demonstra a construção de um **Data Lakehouse** completo na AWS, utilizando dados reais da API do Cartola FC para análise preditiva e estatística.
